@@ -1,0 +1,142 @@
+@import "./styles/tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: #ffffff;
+  color: var(--color-text);
+  font-family: "Work Sans", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+@layer components {
+  .btn-primary {
+    @apply flex h-14 w-full items-center justify-center rounded-full bg-black px-6 text-body font-semibold text-white;
+  }
+  .btn-secondary {
+    @apply flex h-14 w-full items-center justify-center rounded-full border border-black bg-white px-6 text-body font-semibold text-black;
+  }
+  .btn-primary:focus-visible,
+  .btn-secondary:focus-visible,
+  .frost-btn:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .frost {
+    background: var(--frost-bg);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
+  }
+  .frost-btn {
+    @apply frost flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white;
+  }
+  .screen {
+    @apply flex min-h-full flex-col bg-white;
+    padding: calc(var(--safe-top) + 24px) calc(var(--safe-right) + 16px) calc(var(--safe-bottom) + 16px)
+      calc(var(--safe-left) + 16px);
+  }
+}
+
+.target-ring {
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.target-ring[data-aligned="true"] {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(117, 213, 255, 0.35);
+}
+
+/* ---- Blue dot (positions and data-* states are set by CaptureController) ---- */
+.dot > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+.dot-core {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(117, 213, 255, 0.35);
+}
+/* Hold zone: the area the white circle has to be inside for the spot to count. */
+.dot-zone {
+  display: none;
+  width: var(--zone-size, 200px);
+  height: var(--zone-size, 200px);
+  border-radius: 9999px;
+  border: 2px dashed rgba(117, 213, 255, 0.85);
+  background: rgba(117, 213, 255, 0.1);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+.dot[data-zone="true"] .dot-zone {
+  display: block;
+}
+.dot[data-in-zone="true"] .dot-zone {
+  border-style: solid;
+  background: rgba(117, 213, 255, 0.22);
+}
+/* Edge arrow: replaces the dot while the target is off screen, nudging the way to turn. */
+.dot-arrow {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(117, 213, 255, 0.35);
+  align-items: center;
+  justify-content: center;
+  rotate: var(--arrow-angle, 0deg);
+}
+.dot-arrow svg {
+  animation: dot-nudge 900ms ease-in-out infinite;
+}
+.dot[data-arrow="true"] .dot-arrow {
+  display: flex;
+}
+.dot[data-arrow="true"] .dot-core,
+.dot[data-arrow="true"] .dot-zone {
+  display: none;
+}
+@keyframes dot-nudge {
+  0%,
+  100% {
+    transform: translateX(-2px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot-arrow svg {
+    animation: none;
+  }
+}
+/* Dwell fill round the white circle. Circumference of r=40 is 251.3. */
+.dwell-fill {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  overflow: visible;
+}
+.dwell-fill circle {
+  fill: none;
+  stroke: var(--color-captured);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 251.3;
+  stroke-dashoffset: calc(251.3 * (1 - var(--fill, 0)));
+  opacity: calc(var(--fill, 0) * 10);
+}

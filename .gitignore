@@ -1,0 +1,10 @@
+node_modules
+dist
+*.log
+.DS_Store
+
+# Local tooling config
+.claude/
+
+# Pitch deck and its embedded demo video (large, not code)
+deck/

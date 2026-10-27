@@ -1,0 +1,23 @@
+/* Elara Spatial Design System tokens used by the capture spike. */
+:root {
+  --color-text: #262626;
+  --color-text-secondary: #6d6d6d;
+  --color-border: #e7e7e7;
+  --color-surface-quiet: #fafafa;
+  --color-slate-1: #eaeff3;
+  --color-slate-2: #d1dce6;
+  --color-viewfinder: #1e2833;
+  --color-cta: #000000;
+  --color-accent: #75d5ff;
+  --color-record: #ff3b30;
+  --color-captured: #34c759;
+  --color-retake: #f7ce45;
+  --frost-bg: rgba(0, 0, 0, 0.6);
+  --frost-blur: blur(6px);
+  --bubble-bg: rgba(0, 0, 0, 0.59);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
