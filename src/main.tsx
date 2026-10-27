@@ -4,6 +4,7 @@ import "./index.css";
 import { App } from "./App";
 import { config } from "./config";
 import { parseDotParam } from "./core/dot";
+import { DevicePreview, inPreviewFrame } from "./dev/DevicePreview";
 
 // ?dot=arrow,fill,smooth,zone (or all / none) picks the blue-dot variants to try.
 const dot = parseDotParam(new URLSearchParams(location.search).get("dot"));
@@ -11,6 +12,12 @@ if (dot) Object.assign(config.guidance.dot, dot);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    {inPreviewFrame() ? (
+      <App />
+    ) : (
+      <DevicePreview>
+        <App />
+      </DevicePreview>
+    )}
   </StrictMode>,
 );
