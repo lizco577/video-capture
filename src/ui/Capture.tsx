@@ -186,6 +186,7 @@ function Overlay({ c, onExit, onFinishLater, onDone }: { c: CaptureController } 
               slices={view.slices}
               highlightSlice={view.highlightSlice}
               activeBand={view.activeBand}
+              reachedSlice={view.reachedSlice}
               counts={view.counts}
             />
           </div>

@@ -85,6 +85,8 @@ export interface CaptureView {
   /** Slice the ring highlights: the one guidance is working on. */
   highlightSlice: number;
   activeBand: Band;
+  /** Slices before this one have been walked past (all of them once the lap is done). */
+  reachedSlice: number;
   progressWords: string;
   counts: Record<CellState, number>;
   gapsLeft: number;
@@ -728,6 +730,7 @@ export class CaptureController {
       highlightSlice: target?.slice ?? this.lap.guideSlice,
       activeBand:
         target?.kind === "band" ? target.band : bandForPitch(this.orientation.pitch, config.bands),
+      reachedSlice: this.phase === "lap" ? this.lap.guideSlice : this.coverage.slices,
       progressWords: progressWords(progressFraction(this.coverage), config.progress),
       counts: counts(this.coverage),
       gapsLeft: gaps(this.coverage).length,
@@ -749,6 +752,7 @@ export class CaptureController {
       prev.cells === next.cells &&
       prev.highlightSlice === next.highlightSlice &&
       prev.activeBand === next.activeBand &&
+      prev.reachedSlice === next.reachedSlice &&
       prev.progressWords === next.progressWords &&
       prev.muted === next.muted &&
       prev.sensorProblem === next.sensorProblem &&
