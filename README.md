@@ -69,6 +69,38 @@ Toggle them live in the simulator panel ("Blue dot"), or pick them in the URL, w
 also works on a phone: `?dot=arrow,fill`, `?dot=all`, `?dot=none`. The active set is
 logged in the `capture-start` event.
 
+## Upload to Supabase
+
+When "Room captured" appears, the phone uploads the recording and `session.json` to
+the Supabase project and adds a row to `capture_sessions`. Testers can still use
+**Download recording + log**. Without a key in `.env.local`, uploading is off and
+nothing changes.
+
+One-time setup:
+
+1. In Supabase, open **SQL Editor**, paste [`supabase/setup.sql`](supabase/setup.sql)
+   and run it. It creates a private `captures` bucket and the `capture_sessions` table.
+   Phones can only add files and rows; they can't read, list or delete anything.
+2. In **Project Settings → API Keys**, copy the anon (or publishable) key into
+   `VITE_SUPABASE_ANON_KEY` in `.env.local`, then restart `npm run dev`.
+
+To see what came in, use the dashboard (**Table Editor → capture_sessions**,
+**Storage → captures**). Video is stored as `<session>/seg<N>/<seq>.part` chunks;
+to get playable files:
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=your-secret-key node scripts/fetch-capture.mjs --list
+```
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=your-secret-key node scripts/fetch-capture.mjs <session id>
+```
+
+That writes `captures/<id>/seg0.webm` (or `.mp4`), one per segment, plus `session.json`.
+Keep the secret key in your shell, never in `.env.local`.
+
+The free plan holds 1 GB of files, about 30 minutes of recording at 4 Mbps.
+
 ## Tests
 
 ```bash
@@ -127,5 +159,5 @@ Notes:
   one. The download gives one video file per segment plus `session.json`.
 - The camera is requested with `facingMode: "environment"` and an ideal 1920×1080
   (`config.camera`); the actual track size is logged.
-- `src/platform/upload.ts` holds the interface for the later chunked, resumable upload.
-  It isn't implemented.
+- `src/platform/upload.ts` uploads to Supabase after "Room captured" (see below). Each
+  2 s chunk is its own object, so a retry only re-sends what didn't land.

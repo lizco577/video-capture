@@ -66,6 +66,12 @@ export async function putChunk(c: StoredChunk): Promise<void> {
   await (await db()).put("chunks", c);
 }
 
+/** All chunks for a session, in recording order. */
+export async function chunksFor(sessionId: string): Promise<StoredChunk[]> {
+  const chunks = await (await db()).getAllFromIndex("chunks", "bySession", sessionId);
+  return chunks.sort((a, b) => a.segment - b.segment || a.seq - b.seq);
+}
+
 /** All chunks for a session, grouped per segment in order. */
 export async function segmentsFor(sessionId: string): Promise<{ segment: number; mimeType: string; parts: ArrayBuffer[] }[]> {
   const chunks = await (await db()).getAllFromIndex("chunks", "bySession", sessionId);

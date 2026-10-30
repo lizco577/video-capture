@@ -8,3 +8,7 @@ dist
 
 # Pitch deck and its embedded demo video (large, not code)
 deck/
+
+# Supabase keys
+.env*.local
+captures/

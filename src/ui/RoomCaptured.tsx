@@ -3,7 +3,14 @@ import type { CellState } from "../core/coverage";
 import { summarise, type SessionLog } from "../core/session-log";
 import { skippedSentences } from "../core/wording";
 import { buildExport, deliverFiles, downloadFile, formatBytes, type ExportFile } from "../capture/export";
+import { uploadCapture, uploadConfigured, type UploadProgress } from "../platform/upload";
 import { Screen } from "./screens";
+
+type Upload =
+  | { state: "off" }
+  | { state: "sending"; progress: UploadProgress | null }
+  | { state: "done" }
+  | { state: "failed"; error: string };
 
 export function RoomCaptured({
   sessionId,
@@ -33,6 +40,24 @@ export function RoomCaptured({
     };
   }, [sessionId, log, cells]);
 
+  const [upload, setUpload] = useState<Upload>(uploadConfigured() ? { state: "sending", progress: null } : { state: "off" });
+  const sendToServer = async (all: ExportFile[]) => {
+    setUpload({ state: "sending", progress: null });
+    try {
+      // The session log is always the last export file.
+      await uploadCapture(sessionId, log, all[all.length - 1].file, (progress) => setUpload({ state: "sending", progress }));
+      setUpload({ state: "done" });
+    } catch (e) {
+      setUpload({ state: "failed", error: e instanceof Error ? e.message : String(e) });
+    }
+  };
+
+  useEffect(() => {
+    if (files && uploadConfigured()) void sendToServer(files);
+    // Once per capture; "Try again" re-runs it by hand.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files]);
+
   const download = async () => {
     if (!files) return;
     setStatus("Preparing files…");
@@ -60,6 +85,23 @@ export function RoomCaptured({
       {status && (
         <p className="text-tip text-text-2" role="status">
           {status}
+        </p>
+      )}
+      {upload.state !== "off" && (
+        <p className="text-tip text-text-2" role="status" data-testid="upload-status">
+          {upload.state === "sending" &&
+            (upload.progress
+              ? `Uploading: ${formatBytes(upload.progress.bytesSent)} of ${formatBytes(upload.progress.bytesTotal)}. Keep this page open.`
+              : "Starting upload…")}
+          {upload.state === "done" && "Uploaded. You can close this page."}
+          {upload.state === "failed" && (
+            <>
+              Upload stopped ({upload.error}).{" "}
+              <button className="min-h-[44px] underline" onClick={() => files && void sendToServer(files)}>
+                Try again
+              </button>
+            </>
+          )}
         </p>
       )}
 
